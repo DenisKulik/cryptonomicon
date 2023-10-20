@@ -204,5 +204,5 @@ export default {
 </template>
 
 <style>
-@import "App.styles.scss";
+@import "@/assets/tailwind.css";
 </style>

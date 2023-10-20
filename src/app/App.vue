@@ -3,16 +3,52 @@ export default {
   name: "App",
   data() {
     return {
+      initialized: false,
+      coinlist: [],
+      searchSuggestions: [],
       ticker: "",
       tickers: [],
       sel: null,
       graph: [],
+      error: "",
     };
   },
+  created() {
+    (async () => {
+      const res = await fetch(
+        "https://min-api.cryptocompare.com/data/all/coinlist?summary=true"
+      );
+      const data = await res.json();
+      this.coinlist = Object.entries(data.Data);
+      this.initialized = true;
+    })();
+  },
   methods: {
+    onInputChanged(e) {
+      this.error = "";
+      this.searchSuggestions = [];
+
+      if (e.currentTarget.value.trim() === "") return;
+
+      for (let i = 0; i < this.coinlist.length; i++) {
+        if (this.searchSuggestions.length >= 4) break;
+
+        if (
+          this.coinlist[i][1].Symbol.toUpperCase().includes(
+            e.currentTarget.value.toUpperCase()
+          )
+        ) {
+          this.searchSuggestions.push(this.coinlist[i][1].Symbol);
+        }
+      }
+    },
     add() {
+      if (this.tickers.some((t) => t.name === this.ticker.toUpperCase())) {
+        this.error = "Ticker already exists";
+        return;
+      }
       const newTicker = {
-        name: this.ticker,
+        name: this.ticker.toUpperCase(),
         price: "-",
       };
       this.tickers.push(newTicker);
@@ -29,6 +65,12 @@ export default {
         }
       }, 5000);
       this.ticker = "";
+      this.error = "";
+      this.searchSuggestions = [];
+    },
+    addFromSuggestion(suggestion) {
+      this.ticker = suggestion;
+      this.add();
     },
     select(ticker) {
       this.sel = ticker;
@@ -50,17 +92,43 @@ export default {
 
 <template>
   <div class="container mx-auto flex flex-col items-center bg-gray-100 p-4">
-    <div class="container">
+    <div
+      v-if="!initialized"
+      class="fixed w-100 h-100 opacity-80 bg-purple-800 inset-0 z-50 flex items-center justify-center"
+    >
+      <svg
+        class="animate-spin -ml-1 mr-3 h-12 w-12 text-white"
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        viewBox="0 0 24 24"
+      >
+        <circle
+          class="opacity-25"
+          cx="12"
+          cy="12"
+          r="10"
+          stroke="currentColor"
+          stroke-width="4"
+        ></circle>
+        <path
+          class="opacity-75"
+          fill="currentColor"
+          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+        ></path>
+      </svg>
+    </div>
+    <div v-else class="container">
       <section>
         <div class="flex">
           <div class="max-w-xs">
             <label for="wallet" class="block text-sm font-medium text-gray-700"
-              >Тикер</label
+              >Ticker</label
             >
             <div class="mt-1 relative rounded-md shadow-md">
               <input
                 v-model="ticker"
                 v-on:keydown.enter="add"
+                @input="onInputChanged"
                 type="text"
                 name="wallet"
                 id="wallet"
@@ -69,30 +137,19 @@ export default {
               />
             </div>
             <div
+              v-show="searchSuggestions.length"
               class="flex bg-white shadow-md p-1 rounded-md shadow-md flex-wrap"
             >
               <span
+                @click="addFromSuggestion(suggestion)"
+                v-for="suggestion in searchSuggestions"
+                :key="suggestion"
                 class="inline-flex items-center px-2 m-1 rounded-md text-xs font-medium bg-gray-300 text-gray-800 cursor-pointer"
               >
-                BTC
-              </span>
-              <span
-                class="inline-flex items-center px-2 m-1 rounded-md text-xs font-medium bg-gray-300 text-gray-800 cursor-pointer"
-              >
-                DOGE
-              </span>
-              <span
-                class="inline-flex items-center px-2 m-1 rounded-md text-xs font-medium bg-gray-300 text-gray-800 cursor-pointer"
-              >
-                BCH
-              </span>
-              <span
-                class="inline-flex items-center px-2 m-1 rounded-md text-xs font-medium bg-gray-300 text-gray-800 cursor-pointer"
-              >
-                CHD
+                {{ suggestion }}
               </span>
             </div>
-            <div class="text-sm text-red-600">Такой тикер уже добавлен</div>
+            <div v-show="error" class="text-sm text-red-600">{{ error }}</div>
           </div>
         </div>
         <button

@@ -11,10 +11,19 @@ export default {
       sel: null,
       graph: [],
       error: "",
+      page: 1,
+      filter: "",
+      hasNextPage: false,
     };
   },
   created() {
     (async () => {
+      const windowData = Object.fromEntries(
+        new URL(window.location).searchParams.entries()
+      );
+      if (windowData.filter) this.filter = windowData.filter;
+      if (windowData.page) this.page = windowData.page;
+
       const res = await fetch(
         "https://min-api.cryptocompare.com/data/all/coinlist?summary=true"
       );
@@ -58,7 +67,7 @@ export default {
         );
         const data = await res.json();
         this.tickers.find((t) => t.name === tickerName).price =
-          data.USD > 1 ? data.USD.toFixed(2) : data.USD.toPrecision(2);
+          data.USD > 1 ? data.USD.toFixed(2) : data.USD?.toPrecision(2);
 
         if (this.sel?.name === tickerName) {
           this.graph.push(data.USD);
@@ -75,6 +84,7 @@ export default {
         price: "-",
       };
       this.tickers.push(currentTicker);
+      this.filter = "";
       localStorage.setItem("crypto-list", JSON.stringify(this.tickers));
 
       this.subscribeToUpdates(currentTicker.name);
@@ -99,6 +109,34 @@ export default {
       const minValue = Math.min(...this.graph);
       return this.graph.map(
         (price) => 5 + ((price - minValue) * 95) / (maxValue - minValue)
+      );
+    },
+    filteredTickers() {
+      const start = (this.page - 1) * 6;
+      const end = this.page * 6;
+
+      const currentTickers = this.tickers.filter((ticker) =>
+        ticker.name.includes(this.filter.toUpperCase())
+      );
+
+      this.hasNextPage = currentTickers.length > end;
+      return currentTickers.slice(start, end);
+    },
+  },
+  watch: {
+    filter() {
+      this.page = 1;
+      history.pushState(
+        null,
+        document.title,
+        `${window.location.pathname}?filter=${this.filter}&page=${this.page}`
+      );
+    },
+    page() {
+      history.pushState(
+        null,
+        document.title,
+        `${window.location.pathname}?filter=${this.filter}&page=${this.page}`
       );
     },
   },
@@ -190,23 +228,28 @@ export default {
       </section>
 
       <template v-if="tickers.length">
+        <hr class="w-full border-t border-gray-600 my-4" />
         <div>
-          Filter: <input />
           <button
-            class="my-4 inline-flex items-center py-2 px-4 border border-transparent shadow-sm text-sm leading-4 font-medium rounded-full text-white bg-gray-600 hover:bg-gray-700 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
+            v-if="page > 1"
+            @click="page = page - 1"
+            class="my-4 mx-2 inline-flex items-center py-2 px-4 border border-transparent shadow-sm text-sm leading-4 font-medium rounded-full text-white bg-gray-600 hover:bg-gray-700 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
           >
             Prev
           </button>
           <button
-            class="my-4 inline-flex items-center py-2 px-4 border border-transparent shadow-sm text-sm leading-4 font-medium rounded-full text-white bg-gray-600 hover:bg-gray-700 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
+            v-if="hasNextPage"
+            @click="page = page + 1"
+            class="my-4 mx-2 inline-flex items-center py-2 px-4 border border-transparent shadow-sm text-sm leading-4 font-medium rounded-full text-white bg-gray-600 hover:bg-gray-700 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
           >
             Next
           </button>
+          <div>Filter: <input v-model="filter" /></div>
         </div>
         <hr class="w-full border-t border-gray-600 my-4" />
         <dl class="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-3">
           <div
-            v-for="t in tickers"
+            v-for="t in filteredTickers()"
             :key="t.name"
             @click="select(t)"
             :class="{ 'border-4': sel === t }"

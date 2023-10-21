@@ -20,6 +20,15 @@ export default {
       );
       const data = await res.json();
       this.coinlist = Object.entries(data.Data);
+
+      const tickersData = localStorage.getItem("crypto-list");
+      if (tickersData) {
+        this.tickers = JSON.parse(tickersData);
+        this.tickers.forEach((ticker) => {
+          this.subscribeToUpdates(ticker.name);
+        });
+      }
+
       this.initialized = true;
     })();
   },
@@ -42,28 +51,34 @@ export default {
         }
       }
     },
+    subscribeToUpdates(tickerName) {
+      setInterval(async () => {
+        const res = await fetch(
+          `https://min-api.cryptocompare.com/data/price?fsym=${tickerName}&tsyms=USD&api_key=3858c8f19e12b37fc41bb26a21962b574d71bade424011af806ce780f4c7e0d8`
+        );
+        const data = await res.json();
+        this.tickers.find((t) => t.name === tickerName).price =
+          data.USD > 1 ? data.USD.toFixed(2) : data.USD.toPrecision(2);
+
+        if (this.sel?.name === tickerName) {
+          this.graph.push(data.USD);
+        }
+      }, 5000);
+    },
     add() {
       if (this.tickers.some((t) => t.name === this.ticker.toUpperCase())) {
         this.error = "Ticker already exists";
         return;
       }
-      const newTicker = {
+      const currentTicker = {
         name: this.ticker.toUpperCase(),
         price: "-",
       };
-      this.tickers.push(newTicker);
-      setInterval(async () => {
-        const res = await fetch(
-          `https://min-api.cryptocompare.com/data/price?fsym=${newTicker.name}&tsyms=USD&api_key=3858c8f19e12b37fc41bb26a21962b574d71bade424011af806ce780f4c7e0d8`
-        );
-        const data = await res.json();
-        this.tickers.find((t) => t.name === newTicker.name).price =
-          data.USD > 1 ? data.USD.toFixed(2) : data.USD.toPrecision(2);
+      this.tickers.push(currentTicker);
+      localStorage.setItem("crypto-list", JSON.stringify(this.tickers));
 
-        if (this.sel?.name === newTicker.name) {
-          this.graph.push(data.USD);
-        }
-      }, 5000);
+      this.subscribeToUpdates(currentTicker.name);
+
       this.ticker = "";
       this.error = "";
       this.searchSuggestions = [];

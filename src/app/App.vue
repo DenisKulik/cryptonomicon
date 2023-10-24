@@ -68,6 +68,12 @@ export default {
         (price) => 5 + ((price - minValue) * 95) / (maxValue - minValue)
       );
     },
+    pageStateOptions() {
+      return {
+        filter: this.filter,
+        page: this.page,
+      };
+    },
   },
   methods: {
     onInputChanged(e) {
@@ -111,12 +117,10 @@ export default {
         name: this.ticker.toUpperCase(),
         price: "-",
       };
-      this.tickers.push(currentTicker);
-      this.filter = "";
-      localStorage.setItem("crypto-list", JSON.stringify(this.tickers));
-
+      this.tickers = [...this.tickers, currentTicker];
       this.subscribeToUpdates(currentTicker.name);
 
+      this.filter = "";
       this.ticker = "";
       this.error = "";
       this.searchSuggestions = [];
@@ -134,22 +138,20 @@ export default {
     },
   },
   watch: {
+    tickers() {
+      localStorage.setItem("crypto-list", JSON.stringify(this.tickers));
+    },
     selectedTicker() {
       this.graph = [];
     },
     filter() {
       this.page = 1;
-      history.pushState(
-        null,
-        document.title,
-        `${window.location.pathname}?filter=${this.filter}&page=${this.page}`
-      );
     },
-    page() {
+    pageStateOptions(value) {
       history.pushState(
         null,
         document.title,
-        `${window.location.pathname}?filter=${this.filter}&page=${this.page}`
+        `${window.location.pathname}?filter=${value.filter}&page=${value.page}`
       );
     },
     paginatedTickers() {

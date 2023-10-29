@@ -1,5 +1,5 @@
 <script>
-import { loadTickers } from "@/api";
+import { subscribeToTicker, unsubscribeFromTicker } from "@/api";
 
 export default {
   name: "App",
@@ -32,9 +32,14 @@ export default {
       this.coinlist = Object.entries(data.Data);
 
       const tickersData = localStorage.getItem("crypto-list");
-      if (tickersData) this.tickers = JSON.parse(tickersData);
-
-      setInterval(this.updateTickers, 5000);
+      if (tickersData) {
+        this.tickers = JSON.parse(tickersData);
+        this.tickers.forEach((ticker) => {
+          subscribeToTicker(ticker.name, (newPrice) =>
+            this.updateTicker(ticker.name, newPrice)
+          );
+        });
+      }
 
       this.initialized = true;
     })();
@@ -75,6 +80,10 @@ export default {
     },
   },
   methods: {
+    updateTicker(tickerName, price) {
+      const ticker = this.tickers.find((ticker) => ticker.name === tickerName);
+      ticker.price = price;
+    },
     formatPrice(price) {
       if (price === "-") return price;
       return price > 1 ? price.toFixed(2) : price?.toPrecision(2);
@@ -97,28 +106,20 @@ export default {
         }
       }
     },
-    async updateTickers() {
-      if (!this.tickers.length) return;
-
-      const exchangeData = await loadTickers(
-        this.tickers.map((ticker) => ticker.name)
-      );
-
-      this.tickers.forEach((ticker) => {
-        const price = exchangeData[ticker.name.toUpperCase()];
-        ticker.price = price ?? "-";
-      });
-    },
     add() {
       if (this.tickers.some((t) => t.name === this.ticker.toUpperCase())) {
         this.error = "Ticker already exists";
         return;
       }
+
       const currentTicker = {
         name: this.ticker.toUpperCase(),
         price: "-",
       };
       this.tickers = [...this.tickers, currentTicker];
+      subscribeToTicker(currentTicker.name, (newPrice) =>
+        this.updateTicker(currentTicker.name, newPrice)
+      );
 
       this.filter = "";
       this.ticker = "";
@@ -135,6 +136,7 @@ export default {
     handleDelete(tickerToRemove) {
       this.tickers = this.tickers.filter((t) => t !== tickerToRemove);
       if (this.selectedTicker === tickerToRemove) this.selectedTicker = null;
+      unsubscribeFromTicker(tickerToRemove.name);
     },
   },
   watch: {

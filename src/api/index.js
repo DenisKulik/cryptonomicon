@@ -1,1 +1,1 @@
-export { loadTickers } from "./api";
+export { subscribeToTicker, unsubscribeFromTicker } from "./api";

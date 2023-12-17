@@ -1,5 +1,5 @@
 <script>
-import { subscribeToTicker, unsubscribeFromTicker } from "@/api";
+import { subscribeToTicker, unsubscribeFromTicker, getCoinList } from "@/api";
 
 export default {
   name: "App",
@@ -25,11 +25,7 @@ export default {
       if (windowData.filter) this.filter = windowData.filter;
       if (windowData.page) this.page = windowData.page;
 
-      const res = await fetch(
-        "https://min-api.cryptocompare.com/data/all/coinlist?summary=true"
-      );
-      const data = await res.json();
-      this.coinlist = Object.entries(data.Data);
+      this.coinlist = await getCoinList();
 
       const tickersData = localStorage.getItem("crypto-list");
       if (tickersData) {

@@ -1,1 +1,1 @@
-export { subscribeToTicker, unsubscribeFromTicker } from "./api";
+export { subscribeToTicker, unsubscribeFromTicker, getCoinList } from "./api";

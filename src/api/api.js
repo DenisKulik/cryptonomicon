@@ -62,3 +62,11 @@ export const unsubscribeFromTicker = (ticker) => {
   tickersHandlers.delete(ticker);
   unsubscribeFromTickerOnWs(ticker);
 };
+
+export const getCoinList = async () => {
+  const res = await fetch(
+    "https://min-api.cryptocompare.com/data/all/coinlist?summary=true"
+  );
+  const data = await res.json();
+  return Object.entries(data.Data);
+};

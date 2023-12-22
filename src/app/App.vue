@@ -41,6 +41,9 @@ export default {
     })();
   },
   computed: {
+    maxGraphElement() {
+      return this.$refs.graph.clientWidth / 38;
+    },
     startIndex() {
       return (this.page - 1) * 6;
     },
@@ -81,6 +84,9 @@ export default {
       ticker.price = price;
       if (ticker === this.selectedTicker) {
         this.graph.push(price);
+        if (this.graph.length > this.maxGraphElement) {
+          this.graph.shift();
+        }
       }
     },
     formatPrice(price) {
@@ -313,7 +319,10 @@ export default {
         <h3 class="text-lg leading-6 font-medium text-gray-900 my-8">
           {{ selectedTicker.name }} - USD
         </h3>
-        <div class="flex items-end border-gray-600 border-b border-l h-64">
+        <div
+          class="flex items-end border-gray-600 border-b border-l h-64"
+          ref="graph"
+        >
           <div
             v-for="(bar, idx) in normalizedGraph"
             :key="idx"

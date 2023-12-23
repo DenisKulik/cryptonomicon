@@ -12,6 +12,7 @@ export default {
       tickers: [],
       selectedTicker: null,
       graph: [],
+      GRAPH_WIDTH: 38,
       maxGraphElements: 1,
       error: "",
       page: 1,
@@ -85,7 +86,7 @@ export default {
   methods: {
     calculateMaxGraphElements() {
       if (!this.$refs.graph) return;
-      this.maxGraphElements = this.$refs.graph.clientWidth / 38;
+      this.maxGraphElements = this.$refs.graph.clientWidth / this.GRAPH_WIDTH;
     },
     updateTicker(tickerName, price) {
       const ticker = this.tickers.find((ticker) => ticker.name === tickerName);

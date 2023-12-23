@@ -12,6 +12,7 @@ export default {
       tickers: [],
       selectedTicker: null,
       graph: [],
+      maxGraphElements: 1,
       error: "",
       page: 1,
       filter: "",
@@ -40,10 +41,13 @@ export default {
       this.initialized = true;
     })();
   },
+  mounted() {
+    window.addEventListener("resize", this.calculateMaxGraphElements);
+  },
+  beforeDestroy() {
+    window.removeEventListener("resize", this.calculateMaxGraphElements);
+  },
   computed: {
-    maxGraphElement() {
-      return this.$refs.graph.clientWidth / 38;
-    },
     startIndex() {
       return (this.page - 1) * 6;
     },
@@ -79,12 +83,16 @@ export default {
     },
   },
   methods: {
+    calculateMaxGraphElements() {
+      if (!this.$refs.graph) return;
+      this.maxGraphElements = this.$refs.graph.clientWidth / 38;
+    },
     updateTicker(tickerName, price) {
       const ticker = this.tickers.find((ticker) => ticker.name === tickerName);
       ticker.price = price;
       if (ticker === this.selectedTicker) {
         this.graph.push(price);
-        if (this.graph.length > this.maxGraphElement) {
+        while (this.graph.length > this.maxGraphElements) {
           this.graph.shift();
         }
       }

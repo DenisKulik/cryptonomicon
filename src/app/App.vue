@@ -159,6 +159,7 @@ export default {
     },
     selectedTicker() {
       this.graph = [];
+      this.$nextTick().then(this.calculateMaxGraphElements);
     },
     filter() {
       this.page = 1;

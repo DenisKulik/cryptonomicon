@@ -1,16 +1,15 @@
 <script>
-import { subscribeToTicker, unsubscribeFromTicker, getCoinList } from "@/api";
-import AddButton from "@/components/AddButton.vue";
+import { getCoinList, subscribeToTicker, unsubscribeFromTicker } from "@/api";
+import AddTicker from "@/components/AddTicker.vue";
 
 export default {
   name: "App",
-  components: { AddButton },
+  components: { AddTicker },
   data() {
     return {
       initialized: false,
       coinlist: [],
       searchSuggestions: [],
-      ticker: "",
       tickers: [],
       selectedTicker: null,
       graph: [],
@@ -122,29 +121,20 @@ export default {
         }
       }
     },
-    add() {
-      if (this.tickers.some((t) => t.name === this.ticker.toUpperCase())) {
+    add(currentTicker) {
+      if (this.tickers.some((t) => t.name === currentTicker.name)) {
         this.error = "Ticker already exists";
         return;
       }
 
-      const currentTicker = {
-        name: this.ticker.toUpperCase(),
-        price: "-",
-      };
       this.tickers = [...this.tickers, currentTicker];
       subscribeToTicker(currentTicker.name, (newPrice) =>
         this.updateTicker(currentTicker.name, newPrice)
       );
 
       this.filter = "";
-      this.ticker = "";
       this.error = "";
       this.searchSuggestions = [];
-    },
-    addFromSuggestion(suggestion) {
-      this.ticker = suggestion;
-      this.add();
     },
     select(ticker) {
       this.selectedTicker = ticker;
@@ -210,43 +200,12 @@ export default {
       </svg>
     </div>
     <div v-else class="container">
-      <section>
-        <div class="flex">
-          <div class="max-w-xs">
-            <label for="wallet" class="block text-sm font-medium text-gray-700"
-              >Ticker</label
-            >
-            <div class="mt-1 relative rounded-md shadow-md">
-              <input
-                v-model="ticker"
-                v-on:keydown.enter="add"
-                @input="onInputChanged"
-                type="text"
-                name="wallet"
-                id="wallet"
-                class="block w-full pr-10 border-gray-300 text-gray-900 focus:outline-none focus:ring-gray-500 focus:border-gray-500 sm:text-sm rounded-md"
-                placeholder="Например DOGE"
-              />
-            </div>
-            <div
-              v-show="searchSuggestions.length"
-              class="flex bg-white shadow-md p-1 rounded-md shadow-md flex-wrap"
-            >
-              <span
-                @click="addFromSuggestion(suggestion)"
-                v-for="suggestion in searchSuggestions"
-                :key="suggestion"
-                class="inline-flex items-center px-2 m-1 rounded-md text-xs font-medium bg-gray-300 text-gray-800 cursor-pointer"
-              >
-                {{ suggestion }}
-              </span>
-            </div>
-            <div v-show="error" class="text-sm text-red-600">{{ error }}</div>
-          </div>
-        </div>
-        <AddButton @onAdd="add" class="my-4" />
-      </section>
-
+      <AddTicker
+        :error="error"
+        :search-suggestions="searchSuggestions"
+        @addTicker="add"
+        @onInputChanged="onInputChanged"
+      />
       <template v-if="tickers.length">
         <hr class="w-full border-t border-gray-600 my-4" />
         <div>

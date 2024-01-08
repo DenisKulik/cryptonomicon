@@ -1,7 +1,7 @@
 <script>
 import { getCoinList, subscribeToTicker, unsubscribeFromTicker } from "@/api";
 import AddTicker from "@/components/AddTicker.vue";
-import TickersGraph from "@/app/TickersGraph.vue";
+import TickersGraph from "@/components/TickersGraph.vue";
 
 export default {
   name: "App",

@@ -1,24 +1,8 @@
 # cryptonomicon
 
-## Project setup
-```
-pnpm install
-```
+![CI](https://github.com/DenisKulik/cryptonomicon/actions/workflows/github-actions.yml/badge.svg)
 
-### Compiles and hot-reloads for development
-```
-pnpm run serve
-```
+[Demo](https://deniskulik.github.io/cryptonomicon/)
 
-### Compiles and minifies for production
-```
-pnpm run build
-```
-
-### Lints and fixes files
-```
-pnpm run lint
-```
-
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
+## Built With
+This is a cryptonomicon project built using `Vue`, `JavaScript`, `WebSocket` and `Tailwind`.

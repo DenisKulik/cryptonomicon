@@ -3,10 +3,11 @@ import { getCoinList, subscribeToTicker, unsubscribeFromTicker } from "@/api";
 import AddTicker from "@/components/AddTicker.vue";
 import TickersGraph from "@/components/TickersGraph.vue";
 import PreloaderPage from "@/components/PreloaderPage.vue";
+import NavigateButton from "@/components/NavigateButton.vue";
 
 export default {
   name: "App",
-  components: { PreloaderPage, TickersGraph, AddTicker },
+  components: { NavigateButton, PreloaderPage, TickersGraph, AddTicker },
   data() {
     return {
       initialized: false,
@@ -181,20 +182,16 @@ export default {
       <template v-if="tickers.length">
         <hr class="w-full border-t border-gray-600 my-4" />
         <div>
-          <button
+          <NavigateButton
             v-if="page > 1"
-            @click="page = page - 1"
-            class="my-4 mx-2 inline-flex items-center py-2 px-4 border border-transparent shadow-sm text-sm leading-4 font-medium rounded-full text-white bg-gray-600 hover:bg-gray-700 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
-          >
-            Prev
-          </button>
-          <button
+            :title="'Prev'"
+            @click.native="page = page - 1"
+          />
+          <NavigateButton
             v-if="hasNextPage"
-            @click="page = page + 1"
-            class="my-4 mx-2 inline-flex items-center py-2 px-4 border border-transparent shadow-sm text-sm leading-4 font-medium rounded-full text-white bg-gray-600 hover:bg-gray-700 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
-          >
-            Next
-          </button>
+            :title="'Next'"
+            @click.native="page = page + 1"
+          />
           <div>Filter: <input v-model="filter" /></div>
         </div>
         <hr class="w-full border-t border-gray-600 my-4" />

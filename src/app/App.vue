@@ -4,10 +4,17 @@ import AddTicker from "@/components/AddTicker.vue";
 import TickersGraph from "@/components/TickersGraph.vue";
 import PreloaderPage from "@/components/PreloaderPage.vue";
 import NavigateButton from "@/components/NavigateButton.vue";
+import FilterBlock from "@/components/FilterBlock.vue";
 
 export default {
   name: "App",
-  components: { NavigateButton, PreloaderPage, TickersGraph, AddTicker },
+  components: {
+    FilterBlock,
+    NavigateButton,
+    PreloaderPage,
+    TickersGraph,
+    AddTicker,
+  },
   data() {
     return {
       initialized: false,
@@ -192,7 +199,7 @@ export default {
             :title="'Next'"
             @click.native="page = page + 1"
           />
-          <div>Filter: <input v-model="filter" /></div>
+          <FilterBlock v-model="filter" />
         </div>
         <hr class="w-full border-t border-gray-600 my-4" />
         <dl class="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-3">

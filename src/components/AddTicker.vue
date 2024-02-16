@@ -33,7 +33,7 @@
         <div v-show="error" class="text-sm text-red-600">{{ error }}</div>
       </div>
     </div>
-    <AddButton @onAdd="addTicker" class="my-4" />
+    <AddButton @click.stop="addTicker" class="my-4" />
   </section>
 </template>
 <script>

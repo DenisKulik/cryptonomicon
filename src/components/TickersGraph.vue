@@ -8,7 +8,7 @@
         v-for="(bar, idx) in normalizedGraph"
         :key="idx"
         :style="{ height: `${bar}%` }"
-        class="bg-purple-800 border w-10"
+        class="bg-purple-800 border border-slate-900 w-10"
       ></div>
     </div>
     <button @click="closeGraph" type="button" class="absolute top-0 right-0">

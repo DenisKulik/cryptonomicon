@@ -1,3 +1,65 @@
+<template>
+  <div class="min-h-screen bg-gray-950 text-white">
+    <div class="container mx-auto flex flex-col items-center bg-slate-900 p-4">
+      <PreloaderPage v-if="!initialized" />
+      <div v-if="initialized" class="container h-min">
+        <AddTicker
+          :error="error"
+          :search-suggestions="searchSuggestions"
+          @addTicker="add"
+          @onInputChanged="onInputChanged"
+        />
+        <template v-if="tickers.length">
+          <hr class="w-full border-t border-gray-900 my-4" />
+          <div>
+            <NavigateButton
+              v-if="page > 1"
+              :title="'Prev'"
+              @click.native="page = page - 1"
+            />
+            <NavigateButton
+              v-if="hasNextPage"
+              :title="'Next'"
+              @click.native="page = page + 1"
+            />
+            <FilterBlock v-model="filter" />
+          </div>
+          <hr class="w-full border-t border-gray-600 my-4" />
+          <dl class="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-3">
+            <div
+              v-for="t in paginatedTickers"
+              :key="t.name"
+              @click="select(t)"
+              :class="{ 'border-4': selectedTicker === t }"
+              class="bg-slate-800 overflow-hidden shadow rounded-lg border-purple-800 border-solid cursor-pointer"
+            >
+              <div class="px-4 py-5 sm:p-6 text-center">
+                <dt class="text-sm font-medium text-gray-400 truncate">
+                  {{ t.name }} - USD
+                </dt>
+                <dd class="mt-1 text-3xl font-semibold text-gray-100">
+                  {{ formatPrice(t.price) }}
+                </dd>
+              </div>
+              <div class="w-full border-t border-gray-700"></div>
+              <RemoveButton @click="handleDelete(t)" />
+            </div>
+          </dl>
+          <hr class="w-full border-t border-gray-600 my-4" />
+        </template>
+
+        <TickersGraph
+          v-if="selectedTicker"
+          ref="graph"
+          :graph="graph"
+          :selected-ticker="selectedTicker"
+          @closeGraph="clearSelectedTicker"
+        />
+      </div>
+    </div>
+  </div>
+</template>
+
 <script>
 import { getCoinList, subscribeToTicker, unsubscribeFromTicker } from "@/api";
 import AddTicker from "@/components/AddTicker.vue";
@@ -177,66 +239,6 @@ export default {
   },
 };
 </script>
-
-<template>
-  <div class="container mx-auto flex flex-col items-center bg-gray-100 p-4">
-    <PreloaderPage v-if="!initialized" />
-    <div v-if="initialized" class="container">
-      <AddTicker
-        :error="error"
-        :search-suggestions="searchSuggestions"
-        @addTicker="add"
-        @onInputChanged="onInputChanged"
-      />
-      <template v-if="tickers.length">
-        <hr class="w-full border-t border-gray-600 my-4" />
-        <div>
-          <NavigateButton
-            v-if="page > 1"
-            :title="'Prev'"
-            @click.native="page = page - 1"
-          />
-          <NavigateButton
-            v-if="hasNextPage"
-            :title="'Next'"
-            @click.native="page = page + 1"
-          />
-          <FilterBlock v-model="filter" />
-        </div>
-        <hr class="w-full border-t border-gray-600 my-4" />
-        <dl class="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-3">
-          <div
-            v-for="t in paginatedTickers"
-            :key="t.name"
-            @click="select(t)"
-            :class="{ 'border-4': selectedTicker === t }"
-            class="bg-white overflow-hidden shadow rounded-lg border-purple-800 border-solid cursor-pointer"
-          >
-            <div class="px-4 py-5 sm:p-6 text-center">
-              <dt class="text-sm font-medium text-gray-500 truncate">
-                {{ t.name }} - USD
-              </dt>
-              <dd class="mt-1 text-3xl font-semibold text-gray-900">
-                {{ formatPrice(t.price) }}
-              </dd>
-            </div>
-            <div class="w-full border-t border-gray-200"></div>
-            <RemoveButton @click="handleDelete(t)" />
-          </div>
-        </dl>
-        <hr class="w-full border-t border-gray-600 my-4" />
-      </template>
-
-      <TickersGraph
-        v-if="selectedTicker"
-        ref="graph"
-        :graph="graph"
-        :selected-ticker="selectedTicker"
-        @closeGraph="clearSelectedTicker"
-      />
-    </div>
-  </div>
-</template>
 
 <style>
 @import "@/assets/tailwind.css";

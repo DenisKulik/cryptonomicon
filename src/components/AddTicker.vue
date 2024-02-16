@@ -2,10 +2,10 @@
   <section>
     <div class="flex">
       <div class="max-w-xs">
-        <label for="wallet" class="block text-sm font-medium text-gray-700">
+        <label for="wallet" class="block text-sm font-medium text-white">
           Ticker
         </label>
-        <div class="mt-1 relative rounded-md shadow-md">
+        <div class="mt-1 mb-1 relative rounded-md shadow-md">
           <input
             v-model="ticker"
             @keydown.enter="addTicker"
@@ -13,13 +13,13 @@
             type="text"
             name="wallet"
             id="wallet"
-            class="block w-full pr-10 border-gray-300 text-gray-900 focus:outline-none focus:ring-gray-500 focus:border-gray-500 sm:text-sm rounded-md"
+            class="block w-full pr-10 bg-slate-800 border-slate-700 text-white focus:outline-none focus:ring-gray-500 focus:border-gray-500 sm:text-sm rounded-md"
             placeholder="Например DOGE"
           />
         </div>
         <div
           v-show="searchSuggestions.length"
-          class="flex bg-white shadow-md p-1 rounded-md shadow-md flex-wrap"
+          class="flex bg-slate-600 shadow-md p-1 rounded-md shadow-md flex-wrap"
         >
           <span
             v-for="suggestion in searchSuggestions"

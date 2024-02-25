@@ -20,7 +20,7 @@
             <NavigateButton
               v-if="hasNextPage"
               :title="'Next'"
-              @click.native="page = page + 1"
+              @click="page = page + 1"
             />
             <FilterBlock v-model="filter" />
           </div>
